@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Repository - Algorithm Generator</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <!-- API & App Layers -->
+    <script src="../js/api.js" defer></script>
+    <script src="../js/app.js" defer></script>
+    <!-- Alpine.js via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white"
+      x-data="adminCrud()" x-init="initCrud()">
+
+    <!-- Toast Notifications -->
+    <div class="fixed bottom-5 right-5 z-50 flex flex-col gap-3 max-w-md w-full">
+        <template x-for="toast in $store.toasts.list" :key="toast.id">
+            <div class="toast-slide-in p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-md"
+                 :class="{
+                    'bg-emerald-950/80 border border-emerald-500/30 text-emerald-250': toast.type === 'success',
+                    'bg-rose-950/80 border border-rose-500/30 text-rose-250': toast.type === 'error',
+                    'bg-indigo-950/80 border border-indigo-500/30 text-indigo-205': toast.type === 'info'
+                 }">
+                <i class="fa-solid" :class="{
+                    'fa-circle-check text-emerald-400': toast.type === 'success',
+                    'fa-triangle-exclamation text-rose-450': toast.type === 'error',
+                    'fa-circle-info text-indigo-400': toast.type === 'info'
+                }"></i>
+                <div class="flex-1 text-sm font-medium" x-text="toast.message"></div>
+                <button @click="$store.toasts.remove(toast.id)" class="text-slate-400 hover:text-slate-200 transition">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+        </template>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 border-b border-indigo-955/85 backdrop-blur-lg bg-slate-950/75">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <a href="../index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-650 flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-shield-halved text-white text-md"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-indigo-300 bg-clip-text text-transparent">AlgoGen Console</span>
+                    <span class="text-xs block text-emerald-400 font-mono -mt-1 font-semibold">ROOT ACCESS</span>
+                </div>
+            </a>
+
+            <!-- Desktop Links -->
+            <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-355">
+                <a href="../index.html" class="hover:text-white transition flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass text-slate-500"></i> Portal
+                </a>
+                <a href="./admin-dashboard.html" class="hover:text-white transition flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-slate-500"></i> Analytics
+                </a>
+                <a href="./admin-algorithms.html" class="text-indigo-400 hover:text-indigo-350 transition flex items-center gap-2">
+                    <i class="fa-solid fa-database"></i> CRUD Console
+                </a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <div class="text-xs bg-slate-900 border border-slate-800 text-indigo-400 font-bold px-3 py-1 rounded font-mono uppercase">
+                    Admin Session
+                </div>
+                <button @click="$store.auth.logout()" class="px-3.5 py-1.5 rounded-lg bg-rose-950/40 border border-rose-900 text-rose-455 hover:bg-rose-900 hover:text-white font-medium text-xs transition">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 container mx-auto px-4 py-8 max-w-6xl">
+        <div class="flex flex-col lg:flex-row gap-8">
+            
+            <!-- Sidebar Panel -->
+            <div class="lg:w-1/4 flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0">
+                <a href="./admin-dashboard.html" 
+                   class="bg-slate-900/60 border border-slate-800/80 text-slate-400 hover:text-indigo-400 px-4 py-3 rounded-xl text-left text-xs md:text-sm font-medium transition flex items-center gap-3 flex-shrink-0 lg:flex-shrink w-auto lg:w-full">
+                    <i class="fa-solid fa-chart-column"></i> Analytics Dashboard
+                </a>
+                <a href="./admin-algorithms.html" 
+                   class="bg-indigo-600 text-white font-bold px-4 py-3 rounded-xl text-left text-xs md:text-sm font-medium transition flex items-center gap-3 flex-shrink-0 lg:flex-shrink w-auto lg:w-full">
+                    <i class="fa-solid fa-list-check"></i> CRUD Algorithm List
+                </a>
+            </div>
+
+            <!-- CRUD Content -->
+            <div class="lg:flex-1 space-y-6">
+                
+                <!-- Page actions bar -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Algorithm Repository</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Manage existing structures or insert manually calibrated data.</p>
+                    </div>
+                    
+                    <button @click="openAddModal()" 
+                            class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition self-start shadow-lg shadow-indigo-900/25">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>Add New Algorithm</span>
+                    </button>
+                </div>
+
+                <!-- Live filter search console -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2 relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-slate-550 text-xs"></i>
+                        <input type="text" x-model="filterText" placeholder="Filter algorithms in table by name or keywords..."
+                               class="w-full bg-slate-900 border border-slate-800 hover:border-slate-750 focus:border-indigo-500 rounded-xl py-2.5 pl-9 pr-4 text-xs focus:outline-none">
+                    </div>
+                    <div>
+                        <select x-model="filterCategory"
+                                class="w-full bg-slate-900 border border-slate-800 hover:border-slate-750 focus:border-indigo-500 rounded-xl py-2.5 px-3 text-xs focus:outline-none text-slate-400">
+                            <option value="">All Categories</option>
+                            <template x-for="cat in categories" :key="cat">
+                                <option :value="cat" x-text="cat"></option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Datatable Container -->
+                <div class="glass-panel rounded-3xl overflow-hidden glow-indigo relative">
+                    <!-- Table Loader -->
+                    <div x-show="loading" class="absolute inset-0 bg-slate-950/65 backdrop-blur-sm z-30 flex items-center justify-center">
+                        <div class="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900/90 border-b border-slate-800 text-slate-400 uppercase tracking-wider font-mono">
+                                    <th class="p-4">Name</th>
+                                    <th class="p-4">Category</th>
+                                    <th class="p-4">Time Complexity</th>
+                                    <th class="p-4">Space Complexity</th>
+                                    <th class="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="algo in filteredAlgorithms()" :key="algo.algorithm_name">
+                                    <tr class="border-b border-slate-850 hover:bg-slate-900/35 transition">
+                                        <td class="p-4 font-bold text-white font-mono" x-text="algo.algorithm_name"></td>
+                                        <td class="p-4 text-slate-400">
+                                            <span class="px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-[10px]" x-text="algo.category"></span>
+                                        </td>
+                                        <td class="p-4 text-indigo-400 font-mono" x-text="formatTimeComplexity(algo.time_complexity)"></td>
+                                        <td class="p-4 text-violet-400 font-mono" x-text="algo.space_complexity || 'N/A'"></td>
+                                        <td class="p-4 text-right flex justify-end gap-2">
+                                            <button @click="openEditModal(algo)" class="w-8 h-8 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+                                                <i class="fa-regular fa-pen-to-square"></i>
+                                            </button>
+                                            <button @click="openDeleteModal(algo)" class="w-8 h-8 rounded bg-rose-955/35 border border-rose-900/50 text-rose-450 hover:bg-rose-900 hover:text-white flex items-center justify-center transition">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                                
+                                <tr x-show="filteredAlgorithms().length === 0 && !loading">
+                                    <td colspan="5" class="p-8 text-center text-slate-500 font-mono text-xs">
+                                        No algorithm records found matching query parameters.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL: ADD ALGORITHM -->
+    <div x-show="addModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div @click.outside="addModalOpen = false" class="w-full max-w-lg glass-panel rounded-3xl p-6 md:p-8 space-y-4 glow-indigo max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white"><i class="fa-solid fa-square-plus text-indigo-400 mr-1.5"></i> Add Manual Algorithm</h3>
+                <button @click="addModalOpen = false" class="text-slate-500 hover:text-slate-350"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form @submit.prevent="submitAdd()" class="space-y-4 text-xs">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-slate-400 font-medium">Algorithm Name</label>
+                        <input type="text" x-model="addForm.algorithm_name" required placeholder="e.g. Prim's Algorithm"
+                               class="w-full bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg p-2.5 text-slate-200 focus:outline-none">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-slate-400 font-medium">Category</label>
+                        <input type="text" x-model="addForm.category" required placeholder="e.g. Graph / Sorting"
+                               class="w-full bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg p-2.5 text-slate-200 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-slate-400 font-medium">Description</label>
+                    <textarea x-model="addForm.description" required rows="3" placeholder="Provide description..."
+                              class="w-full bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg p-2.5 text-slate-200 focus:outline-none resize-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-slate-400 font-medium">Time Complexity</label>
+                        <input type="text" x-model="addForm.time_complexity" required placeholder="e.g. O(V^2)"
+                               class="w-full bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg p-2.5 text-slate-200 focus:outline-none">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-slate-400 font-medium">Space Complexity</label>
+                        <input type="text" x-model="addForm.space_complexity" required placeholder="e.g. O(V)"
+                               class="w-full bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg p-2.5 text-slate-200 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                    <button type="button" @click="addModalOpen = false" class="px-4 py-2 border border-slate-800 text-slate-400 rounded-xl hover:border-slate-700">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-650 hover:bg-indigo-600 text-white rounded-xl font-semibold">Save Algorithm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDIT ALGORITHM DESCRIPTION -->
+    <div x-show="editModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div @click.outside="editModalOpen = false" class="w-full max-w-md glass-panel rounded-3xl p-6 md:p-8 space-y-4 glow-indigo">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white"><i class="fa-regular fa-pen-to-square text-indigo-400 mr-1.5"></i> Update Description</h3>
+                <button @click="editModalOpen = false" class="text-slate-500 hover:text-slate-355"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form @submit.prevent="submitEdit()" class="space-y-4 text-xs">
+                <div>
+                    <span class="text-[10px] text-slate-500 font-mono block">Editing algorithm:</span>
+                    <strong class="text-sm text-indigo-300 font-mono block" x-text="editForm.algorithm_name"></strong>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-slate-400 font-medium">New Description</label>
+                    <textarea x-model="editForm.description" required rows="5" placeholder="Update description..."
+                              class="w-full bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-lg p-2.5 text-slate-200 focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
+                    <button type="button" @click="editModalOpen = false" class="px-4 py-2 border border-slate-800 text-slate-400 rounded-xl hover:border-slate-700">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-650 hover:bg-indigo-600 text-white rounded-xl font-semibold">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIRM DELETE -->
+    <div x-show="deleteModalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div @click.outside="deleteModalOpen = false" class="w-full max-w-sm glass-panel rounded-3xl p-6 text-center space-y-6 glow-indigo">
+            <div class="w-12 h-12 rounded-full bg-rose-955/20 border border-rose-900 text-rose-500 flex items-center justify-center mx-auto text-xl animate-bounce">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            
+            <div class="space-y-2">
+                <h3 class="text-base font-bold text-white">Delete Algorithm?</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Are you absolutely sure you want to delete <strong class="text-rose-455 font-mono" x-text="selectedAlgo?.algorithm_name"></strong> from the database? This action is permanent and cannot be undone.
+                </p>
+            </div>
+
+            <div class="flex gap-3">
+                <button @click="deleteModalOpen = false" class="flex-1 py-2.5 border border-slate-850 text-slate-400 hover:border-slate-700 rounded-xl text-xs transition">Cancel</button>
+                <button @click="submitDelete()" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold transition">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 bg-slate-955/20 py-6 text-center text-slate-650 text-xs">
+        Admin Security Workspace Panel &copy; 2026. Environment: Root algorithm CRUD.
+    </footer>
+
+    <!-- Component Logic -->
+    <script>
+        function adminCrud() {
+            return {
+                loading: false,
+                algorithms: [],
+                categories: [],
+                filterText: '',
+                filterCategory: '',
+                addModalOpen: false,
+                editModalOpen: false,
+                deleteModalOpen: false,
+                selectedAlgo: null,
+
+                addForm: {
+                    algorithm_name: '',
+                    category: '',
+                    description: '',
+                    time_complexity: '',
+                    space_complexity: ''
+                },
+
+                editForm: {
+                    algorithm_name: '',
+                    description: ''
+                },
+
+                async initCrud() {
+                    await this.loadAlgorithms();
+                },
+
+                async loadAlgorithms() {
+                    this.loading = true;
+                    try {
+                        const res = await API.adminGetAlgorithms();
+                        if (res.status === 'success') {
+                            this.algorithms = res.data;
+                            
+                            // Extract unique categories
+                            const cats = new Set(res.data.map(x => x.category).filter(Boolean));
+                            this.categories = Array.from(cats);
+                        }
+                    } catch (err) {
+                        showToast('Failed to retrieve algorithms: ' + err.message, 'error');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                filteredAlgorithms() {
+                    return this.algorithms.filter(algo => {
+                        const matchesText = !this.filterText || 
+                            algo.algorithm_name.toLowerCase().includes(this.filterText.toLowerCase()) || 
+                            (algo.description && algo.description.toLowerCase().includes(this.filterText.toLowerCase()));
+                        
+                        const matchesCategory = !this.filterCategory || algo.category === this.filterCategory;
+                        
+                        return matchesText && matchesCategory;
+                    });
+                },
+
+                formatTimeComplexity(val) {
+                    if (typeof val === 'object' && val !== null) {
+                        return val.average || val.worst || 'N/A';
+                    }
+                    return val || 'N/A';
+                },
+
+                openAddModal() {
+                    this.addForm = {
+                        algorithm_name: '',
+                        category: '',
+                        description: '',
+                        time_complexity: '',
+                        space_complexity: ''
+                    };
+                    this.addModalOpen = true;
+                },
+
+                async submitAdd() {
+                    this.loading = true;
+                    try {
+                        const res = await API.adminAddAlgorithm(this.addForm);
+                        if (res.status === 'success') {
+                            showToast(res.message || 'Algorithm saved successfully!', 'success');
+                            this.addModalOpen = false;
+                            await this.loadAlgorithms();
+                        } else {
+                            throw new Error(res.message);
+                        }
+                    } catch (err) {
+                        showToast(err.message || 'Failed to save algorithm', 'error');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                openEditModal(algo) {
+                    this.editForm = {
+                        algorithm_name: algo.algorithm_name,
+                        description: algo.description || ''
+                    };
+                    this.editModalOpen = true;
+                },
+
+                async submitEdit() {
+                    this.loading = true;
+                    try {
+                        const res = await API.adminUpdateAlgorithm(this.editForm.algorithm_name, this.editForm.description);
+                        if (res.status === 'success') {
+                            showToast(res.message || 'Description updated successfully!', 'success');
+                            this.editModalOpen = false;
+                            await this.loadAlgorithms();
+                        } else {
+                            throw new Error(res.message);
+                        }
+                    } catch (err) {
+                        showToast(err.message || 'Failed to update description', 'error');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                openDeleteModal(algo) {
+                    this.selectedAlgo = algo;
+                    this.deleteModalOpen = true;
+                },
+
+                async submitDelete() {
+                    if (!this.selectedAlgo) return;
+                    this.loading = true;
+                    try {
+                        const res = await API.adminDeleteAlgorithm(this.selectedAlgo.algorithm_name);
+                        if (res.status === 'success') {
+                            showToast(res.message || 'Algorithm deleted from repository!', 'success');
+                            this.deleteModalOpen = false;
+                            this.selectedAlgo = null;
+                            await this.loadAlgorithms();
+                        } else {
+                            throw new Error(res.message);
+                        }
+                    } catch (err) {
+                        showToast(err.message || 'Failed to delete algorithm', 'error');
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            };
+        }
+    </script>
+</body>
+</html>
