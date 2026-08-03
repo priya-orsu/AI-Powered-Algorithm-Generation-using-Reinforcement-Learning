@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🚀 Algorithm Generator Backend
 
 **Version:** 1.0.0
@@ -436,3 +437,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 **Role:** Backend & Database Developer
 
 **Capstone Project:** AI-Powered Algorithm Generation System
+=======
+# AI-Powered-Algorithm-Generation-using-Reinforcement-Learning
+Introducing a hybrid approach integrating genetic algorithms and reinforcement learning. This enables dynamic learning, real-time adaptability, and improved performance across multiple problem domains, making it more efficient and scalable.
+>>>>>>> 4a4ca23e44bb724b8b1c4cde19130aa8e8fdf921
