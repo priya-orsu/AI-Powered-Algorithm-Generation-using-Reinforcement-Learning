@@ -3351,7 +3351,24 @@ export function StudioPage() {
 
                                             <div className="p-4 rounded-xl bg-slate-900/80 border border-white/5 space-y-3">
                                                 <p className="text-slate-100 text-xs md:text-sm leading-relaxed font-sans font-medium">
-                                                    {activeResult.description || `${activeResult.algorithm_name} is a computational algorithm designed to solve ${activeResult.category || 'algorithmic'} problems by systematically processing input data, evaluating state transitions, and producing optimized solutions.`}
+                                                    {(() => {
+                                                        let desc = activeResult.description || '';
+                                                        if (desc && (desc.includes("Generated using Tri-Hybrid") || desc.includes("Locates target elements or key patterns efficiently"))) {
+                                                            if (desc.includes("Generated using Tri-Hybrid")) {
+                                                                desc = desc.split("Generated using Tri-Hybrid")[0].trim();
+                                                            }
+                                                            if (desc.startsWith("Locates target elements or key patterns efficiently within collections for '")) {
+                                                                desc = '';
+                                                            }
+                                                        }
+                                                        if (!desc) {
+                                                            if (activeResult.algorithm_name?.toLowerCase().includes("binary search")) {
+                                                                return "Binary Search is an efficient divide-and-conquer search algorithm designed to find the position of a target value within a strictly sorted array or monotonic search space. It operates by repeatedly comparing the target value to the middle element: if they match, its index is returned; if the target is smaller, the search interval is narrowed to the lower half; if larger, to the upper half. This eliminates half of the remaining elements at each comparison step, achieving logarithmic O(log n) time complexity.";
+                                                            }
+                                                            return `${activeResult.algorithm_name} is a computational algorithm designed to solve ${activeResult.category || 'algorithmic'} problems by systematically processing input data, evaluating state transitions, and producing optimized solutions.`;
+                                                        }
+                                                        return desc;
+                                                    })()}
                                                 </p>
                                             </div>
                                         </div>

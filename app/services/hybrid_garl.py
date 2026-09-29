@@ -3422,10 +3422,8 @@ End"""
         else:
             base_matter = f"Synthesizes custom algorithmic state transitions and optimal execution paths tailored to prompt intent: '{user_prompt or algorithm_name}'."
 
-        description = (
-            f"{base_matter} Generated using Tri-Hybrid Metaheuristics (Simulated Annealing, PSO, Tabu Search), "
-            f"Genetic Algorithm (GA), and Reinforcement Learning (RL) policy selection with dynamic '{best_candidate['strategy']}' strategy."
-        )
+        from app.services.algorithm_definition_catalog import get_authentic_algorithm_definition
+        description = get_authentic_algorithm_definition(algorithm_name, category, user_prompt)
 
         if parsed_prompt_info and parsed_prompt_info.get("problem_statement"):
             problem_stmt = parsed_prompt_info["problem_statement"]

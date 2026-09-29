@@ -71,8 +71,16 @@ def enrich_algorithm_with_leetcode(algo_dict: dict) -> dict:
     cat = algo_dict.get("category", "")
     kw = algo_dict.get("keywords", [])
     desc = algo_dict.get("description", "")
-    stmt = algo_dict.get("problem_statement", "")
-    
+    from app.services.algorithm_definition_catalog import get_authentic_algorithm_definition
+    if not desc or "Generated using Tri-Hybrid" in desc or "Locates target elements" in desc:
+        desc = get_authentic_algorithm_definition(name, cat)
+        algo_dict["description"] = desc
+        if "_id" in algo_dict:
+            try:
+                algorithm_collection.update_one({"_id": algo_dict["_id"]}, {"$set": {"description": desc}})
+            except Exception:
+                pass
+
     # 1. Attach suitable LeetCode problems
     problems = get_leetcode_problems_for_algorithm(
         algorithm_name=name,
@@ -273,6 +281,12 @@ def get_algorithm_by_name(algorithm_name: str):
         print("Engine Source :", source_name)
         print("Persisting to MongoDB...")
         print("=========================================\n")
+
+        # Ensure authentic, clean definition before saving
+        from app.services.algorithm_definition_catalog import get_authentic_algorithm_definition
+        curr_desc = algorithm_document.get("description", "")
+        if not curr_desc or "Generated using Tri-Hybrid" in curr_desc or "Locates target elements" in curr_desc:
+            algorithm_document["description"] = get_authentic_algorithm_definition(stored_name, category_hint, algorithm_name)
 
         # Automatically persist newly generated algorithm to MongoDB
         algorithm_collection.update_one(
