@@ -317,9 +317,9 @@ Here are recommended platform configurations for deploying this full-stack proje
 
 # 👨‍💻 Author & Project Info
 
-**Developer**: ORSU LIKHITA PRIYA, PRATHIPATI GOWTHAM SAI,  ANSAR KHAN, MODUGULA YASASWINI
+**Developer**: ORSU LIKHITA PRIYA, PRATHIPATI GOWTHAM SAI, Pathan ANSAR KHAN, MODUGULA YASASWINI
 **Role**: Full-Stack & AI Systems Developer  
-**Capstone Project**: AI-Powered Algorithm Generation using Reinforcement Learning  
+**Capstone Project**: AI-Powered Algorithm Generation System using Reinforcement Learning  
 
 ---
 
