@@ -3328,49 +3328,31 @@ export function StudioPage() {
                                 {/* Tab 1: OVERVIEW - EFFICIENT & INTUITIVE BREAKDOWN */}
                                 {studioTab === 'overview' && (
                                     <div className="space-y-6">
-                                        {/* 1. High-Level Intuition & Mental Model Hero Card */}
-                                        <div className="p-6 rounded-2xl bg-gradient-to-br from-cyan-950/30 via-slate-900 to-[#080c14] border border-cyan-500/30 shadow-xl space-y-4">
+                                        {/* 1. Algorithm Definition Card */}
+                                        <div className="p-6 rounded-2xl bg-gradient-to-br from-[#0c1424] via-slate-900 to-[#070c17] border border-cyan-500/30 shadow-xl space-y-4">
                                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
                                                 <div className="flex items-center gap-2.5">
                                                     <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-inner">
-                                                        <Sparkles className="w-4 h-4" />
+                                                        <BookOpen className="w-4 h-4" />
                                                     </div>
                                                     <div>
                                                         <h3 className="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                                                            Core Intuition & Mental Model
+                                                            Algorithm Definition
                                                         </h3>
-                                                        <p className="text-[11px] text-slate-400">How this algorithm works in plain, simple terms</p>
+                                                        <p className="text-[11px] text-slate-400">Formal specification and theoretical concept of {activeResult.algorithm_name}</p>
                                                     </div>
                                                 </div>
-                                                {activeResult.overview_meta?.paradigm && (
+                                                {activeResult.category && (
                                                     <span className="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase bg-cyan-950 border border-cyan-500/40 text-cyan-300 self-start sm:self-auto shadow-sm">
-                                                        Paradigm: {activeResult.overview_meta.paradigm}
+                                                        Category: {activeResult.category}
                                                     </span>
-            
-                                                    )}
+                                                )}
                                             </div>
 
-                                            <p className="text-slate-200 text-xs md:text-sm leading-relaxed font-sans bg-slate-900/60 p-4 rounded-xl border border-white/5">
-                                                {activeResult.overview_meta?.intuitive_explanation || activeResult.description}
-                                            </p>
-
-                                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-                                                {activeResult.overview_meta?.key_takeaway ? (
-                                                    <div className="flex items-start gap-2.5 p-3 rounded-xl bg-cyan-950/20 border border-cyan-500/20 text-xs text-cyan-200 flex-1">
-                                                        <Zap className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
-                                                        <div>
-                                                            <span className="font-bold text-cyan-300">Key Takeaway: </span>
-                                                            <span>{activeResult.overview_meta.key_takeaway}</span>
-                                                        </div>
-                                                    </div>
-                                                ) : <div />}
-                                                <button
-                                                    onClick={() => setStudioTab('visualizer')}
-                                                    className="px-4 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-bold font-mono transition flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 shrink-0 transform hover:-translate-y-0.5"
-                                                >
-                                                    <Play className="w-3.5 h-3.5 fill-current" />
-                                                    <span>Launch Live Execution Visualizer →</span>
-                                                </button>
+                                            <div className="p-4 rounded-xl bg-slate-900/80 border border-white/5 space-y-3">
+                                                <p className="text-slate-100 text-xs md:text-sm leading-relaxed font-sans font-medium">
+                                                    {activeResult.description || `${activeResult.algorithm_name} is a computational algorithm designed to solve ${activeResult.category || 'algorithmic'} problems by systematically processing input data, evaluating state transitions, and producing optimized solutions.`}
+                                                </p>
                                             </div>
                                         </div>
 
