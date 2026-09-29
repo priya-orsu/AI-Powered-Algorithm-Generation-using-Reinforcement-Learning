@@ -5,9 +5,8 @@ import os
 load_dotenv()
 
 client = OpenAI(
-    client = OpenAI(
-    api_key=os.getenv("OPENROUTER_API_KEY"),
-    base_url="https://openrouter.ai/api/v1")
+    api_key=os.getenv("OPENROUTER_API_KEY", "dummy_key"),
+    base_url="https://openrouter.ai/api/v1"
 )
 
 def ask_ai(question: str):
@@ -20,9 +19,9 @@ def ask_ai(question: str):
                     "role": "system",
                     "content": (
                         "You are an expert Computer Science professor. "
-                        "Explain algorithms with description, working steps, "
-                        "time complexity, space complexity, applications, "
-                        "advantages, disadvantages, and Python implementation."
+                        "Explain algorithms with detailed description, clear step-by-step execution process, "
+                        "time complexity, space complexity, practical applications, "
+                        "algorithm-specific advantages and disadvantages, candidate interview questions based on the algorithm, and Python implementation."
                     )
                 },
                 {

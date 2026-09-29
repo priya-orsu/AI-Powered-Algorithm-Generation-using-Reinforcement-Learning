@@ -6,7 +6,7 @@ from app.database.connection import api_log_collection
 
 async def log_requests(request, call_next):
 
-    print("🔥 MIDDLEWARE WORKING")
+    print("[LOGGER] MIDDLEWARE WORKING")
 
     start_time = time()
 
