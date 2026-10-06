@@ -42,6 +42,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# Android / Capacitor
+frontend/android/app/build/
+frontend/android/.gradle/
+frontend/android/build/
+frontend/android/local.properties
+
 # Uploads & Logs
 uploads/
 logs/
