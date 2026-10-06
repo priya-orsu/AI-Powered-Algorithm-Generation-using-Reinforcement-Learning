@@ -1,0 +1,17 @@
+{
+  "short_name": "AlgoGen Studio",
+  "name": "AlgoGen Studio — AI Algorithm Generation Engine",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#030712",
+  "theme_color": "#06b6d4",
+  "display": "standalone",
+  "orientation": "any",
+  "description": "AI-Powered Algorithm Generation using Reinforcement Learning and Genetic Algorithms."
+}
