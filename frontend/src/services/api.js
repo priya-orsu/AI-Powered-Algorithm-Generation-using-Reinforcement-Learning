@@ -2,29 +2,29 @@
  * API Integration Layer for FastAPI Backend (http://localhost:8000)
  */
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 async function apiFetch(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
-    
+
     const headers = {
         'Content-Type': 'application/json',
         ...(options.headers || {})
     };
-    
+
     const token = localStorage.getItem('admin_token');
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
     }
-    
+
     const config = {
         ...options,
         headers
     };
-    
+
     try {
         const response = await fetch(url, config);
-        
+
         if (response.status === 401) {
             localStorage.removeItem('admin_token');
             localStorage.removeItem('admin_user');
@@ -33,13 +33,13 @@ async function apiFetch(endpoint, options = {}) {
             }
             throw new Error('Unauthorized session. Please sign in again.');
         }
-        
+
         const data = await response.json();
-        
+
         if (!response.ok) {
             throw new Error(data.detail || data.message || `API Error: ${response.statusText}`);
         }
-        
+
         return data;
     } catch (error) {
         console.error(`API Fetch Error on ${endpoint}:`, error);
