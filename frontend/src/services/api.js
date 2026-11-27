@@ -1,8 +1,10 @@
 /**
- * API Integration Layer for FastAPI Backend (http://localhost:8000)
+ * API Integration Layer for FastAPI Backend
  */
 
-const API_BASE_URL = 'http://localhost:8000';
+export const API_BASE_URL = (
+    import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+).replace(/\/+$/, '');
 
 async function apiFetch(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;

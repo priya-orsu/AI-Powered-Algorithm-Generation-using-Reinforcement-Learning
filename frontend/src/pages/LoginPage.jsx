@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Brain, Lock, User, Mail, Eye, EyeOff, Shield, ArrowRight, CheckCircle2, ArrowLeft, X, KeyRound, RefreshCw, Sparkles, Send, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { API } from '../services/api';
+import { API, API_BASE_URL } from '../services/api';
 
 export function LoginPage() {
     const { loginAdmin, loginUser } = useAuth();
@@ -381,7 +381,7 @@ export function LoginPage() {
                     </div>
 
                     <div className="pt-6 border-t border-white/5 text-[11px] text-slate-500 font-mono">
-                        FastAPI Backend Target: http://localhost:8000
+                        FastAPI Backend Target: {API_BASE_URL}
                     </div>
                 </div>
 
