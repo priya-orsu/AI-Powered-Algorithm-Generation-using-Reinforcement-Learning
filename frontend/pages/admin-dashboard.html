@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Algorithm Generator</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <!-- API & App Layers -->
+    <script src="../js/api.js" defer></script>
+    <script src="../js/app.js" defer></script>
+    <!-- Alpine.js via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white"
+      x-data="adminDashboard()" x-init="initAdminDashboard()">
+
+    <!-- Toast Notifications -->
+    <div class="fixed bottom-5 right-5 z-50 flex flex-col gap-3 max-w-md w-full">
+        <template x-for="toast in $store.toasts.list" :key="toast.id">
+            <div class="toast-slide-in p-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-md"
+                 :class="{
+                    'bg-emerald-950/80 border border-emerald-500/30 text-emerald-250': toast.type === 'success',
+                    'bg-rose-950/80 border border-rose-500/30 text-rose-250': toast.type === 'error',
+                    'bg-indigo-950/80 border border-indigo-500/30 text-indigo-205': toast.type === 'info'
+                 }">
+                <i class="fa-solid" :class="{
+                    'fa-circle-check text-emerald-400': toast.type === 'success',
+                    'fa-triangle-exclamation text-rose-450': toast.type === 'error',
+                    'fa-circle-info text-indigo-400': toast.type === 'info'
+                }"></i>
+                <div class="flex-1 text-sm font-medium" x-text="toast.message"></div>
+                <button @click="$store.toasts.remove(toast.id)" class="text-slate-400 hover:text-slate-200 transition">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+        </template>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 border-b border-indigo-950/85 backdrop-blur-lg bg-slate-950/75">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <a href="../index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-650 flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-shield-halved text-white text-md"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-indigo-300 bg-clip-text text-transparent">AlgoGen Console</span>
+                    <span class="text-xs block text-emerald-400 font-mono -mt-1 font-semibold">ROOT ACCESS</span>
+                </div>
+            </a>
+
+            <!-- Desktop Links -->
+            <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-355">
+                <a href="../index.html" class="hover:text-white transition flex items-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass text-slate-500"></i> Portal
+                </a>
+                <a href="./admin-dashboard.html" class="text-indigo-400 hover:text-indigo-350 transition flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie"></i> Analytics
+                </a>
+                <a href="./admin-algorithms.html" class="hover:text-white transition flex items-center gap-2">
+                    <i class="fa-solid fa-database"></i> CRUD Console
+                </a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <div class="text-xs bg-slate-900 border border-slate-800 text-indigo-400 font-bold px-3 py-1 rounded font-mono uppercase">
+                    Admin Session
+                </div>
+                <button @click="$store.auth.logout()" class="px-3.5 py-1.5 rounded-lg bg-rose-950/40 border border-rose-900 text-rose-400 hover:bg-rose-900 hover:text-white font-medium text-xs transition">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 container mx-auto px-4 py-8 max-w-6xl">
+        <div class="flex flex-col lg:flex-row gap-8">
+            
+            <!-- Admin Nav Panel -->
+            <div class="lg:w-1/4 flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0">
+                <a href="./admin-dashboard.html" 
+                   class="bg-indigo-600 text-white font-bold px-4 py-3 rounded-xl text-left text-xs md:text-sm font-medium transition flex items-center gap-3 flex-shrink-0 lg:flex-shrink w-auto lg:w-full">
+                    <i class="fa-solid fa-chart-column"></i> Analytics Dashboard
+                </a>
+                <a href="./admin-algorithms.html" 
+                   class="bg-slate-900/60 border border-slate-800/80 text-slate-400 hover:text-indigo-400 px-4 py-3 rounded-xl text-left text-xs md:text-sm font-medium transition flex items-center gap-3 flex-shrink-0 lg:flex-shrink w-auto lg:w-full">
+                    <i class="fa-solid fa-list-check"></i> CRUD Algorithm List
+                </a>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div class="lg:flex-1 space-y-8">
+                
+                <!-- System Health Notice Bar -->
+                <div class="p-4 rounded-2xl flex items-center justify-between gap-4"
+                     :class="dbConnected ? 'bg-emerald-950/20 border border-emerald-900/50 text-emerald-400' : 'bg-rose-950/20 border border-rose-900/50 text-rose-400'">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid" :class="dbConnected ? 'fa-circle-check text-emerald-500' : 'fa-triangle-exclamation text-rose-500'"></i>
+                        <div class="text-xs">
+                            <span class="font-bold uppercase tracking-wider block">MongoDB Database Status</span>
+                            <span x-text="dbConnected ? 'Verification verified: Connection running successfully.' : 'Verification failed: Connection database offline.'"></span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold" x-text="dbConnected ? 'ONLINE' : 'OFFLINE'"></span>
+                </div>
+
+                <!-- Primary KPIs metrics grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="glass-panel rounded-2xl p-5 relative overflow-hidden">
+                        <span class="block text-[10px] text-slate-500 uppercase font-mono tracking-wider">Total Algorithms</span>
+                        <span class="text-3xl font-extrabold text-white mt-1 block font-mono" x-text="stats.total_algorithms || 0">0</span>
+                        <div class="absolute -right-2 -bottom-2 opacity-5 text-4xl text-slate-400"><i class="fa-solid fa-calculator"></i></div>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-5 relative overflow-hidden">
+                        <span class="block text-[10px] text-slate-500 uppercase font-mono tracking-wider">Total Searches</span>
+                        <span class="text-3xl font-extrabold text-white mt-1 block font-mono" x-text="stats.total_queries || 0">0</span>
+                        <div class="absolute -right-2 -bottom-2 opacity-5 text-4xl text-slate-400"><i class="fa-solid fa-magnifying-glass"></i></div>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-5 relative overflow-hidden">
+                        <span class="block text-[10px] text-slate-500 uppercase font-mono tracking-wider">AI Generated</span>
+                        <span class="text-3xl font-extrabold text-indigo-400 mt-1 block font-mono" x-text="generationData.generated || 0">0</span>
+                        <div class="absolute -right-2 -bottom-2 opacity-5 text-4xl text-slate-400"><i class="fa-solid fa-brain"></i></div>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-5 relative overflow-hidden">
+                        <span class="block text-[10px] text-slate-500 uppercase font-mono tracking-wider">API Avg Response</span>
+                        <span class="text-2xl font-extrabold text-violet-400 mt-2 block font-mono" x-text="stats.average_response_time_ms ? stats.average_response_time_ms + ' ms' : '0 ms'">0 ms</span>
+                        <div class="absolute -right-2 -bottom-2 opacity-5 text-4xl text-slate-400"><i class="fa-regular fa-clock"></i></div>
+                    </div>
+                </div>
+
+                <!-- Graphs Container (Aggregation API metrics) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Chart 1: API Endpoint usage grouping -->
+                    <div class="glass-panel rounded-3xl p-6 space-y-4">
+                        <h3 class="text-xs font-bold text-white uppercase tracking-wider"><i class="fa-solid fa-chart-pie text-indigo-400 mr-1.5"></i> API Endpoint Call Volume</h3>
+                        <div class="w-full h-56 relative">
+                            <canvas id="apiUsageChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart 2: Gen Log Success analytics -->
+                    <div class="glass-panel rounded-3xl p-6 space-y-4">
+                        <h3 class="text-xs font-bold text-white uppercase tracking-wider"><i class="fa-solid fa-chart-bar text-violet-400 mr-1.5"></i> AI Generator Results Ratio</h3>
+                        <div class="w-full h-56 relative">
+                            <canvas id="aiGenerationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aggregate system lists: Recent DB Logs -->
+                <div class="glass-panel rounded-3xl p-6 space-y-4 glow-indigo">
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-list-ul text-indigo-400"></i> Global Search stream</h3>
+                    
+                    <template x-if="recentQueries.length === 0">
+                        <div class="text-center py-8 text-xs text-slate-500">
+                            No queries processed in query history log repository
+                        </div>
+                    </template>
+                    
+                    <div class="overflow-x-auto" x-show="recentQueries.length > 0">
+                        <table class="w-full text-left text-xs border-collapse font-mono">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-slate-400 pb-2 text-[10px] uppercase">
+                                    <th class="pb-2">Query String</th>
+                                    <th class="pb-2">Search Type</th>
+                                    <th class="pb-2">Outcome Status</th>
+                                    <th class="pb-2 text-right">Accessed Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="item in recentQueries" :key="item.timestamp">
+                                    <tr class="border-b border-slate-850 hover:bg-slate-900/20">
+                                        <td class="py-2.5 font-bold text-slate-200" x-text="item.query"></td>
+                                        <td class="py-2.5 text-slate-400" x-text="item.search_type"></td>
+                                        <td class="py-2.5">
+                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold"
+                                                  :class="item.status === 'Found' ? 'bg-slate-900 text-slate-400' : 'bg-indigo-950 text-indigo-400'">
+                                                <span x-text="item.status"></span>
+                                            </span>
+                                        </td>
+                                        <td class="py-2.5 text-slate-500 text-right" x-text="formatTime(item.timestamp)"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-slate-650 text-xs">
+        Admin Security Workspace Panel &copy; 2026. Environment: Root API dashboard.
+    </footer>
+
+    <!-- Chart Configuration Script & Component logic -->
+    <script>
+        function adminDashboard() {
+            return {
+                dbConnected: true,
+                stats: {},
+                apiUsage: [],
+                generationData: {},
+                recentQueries: [],
+                apiChart: null,
+                aiChart: null,
+
+                async initAdminDashboard() {
+                    await this.checkHealth();
+                    await this.loadStats();
+                    this.renderCharts();
+                },
+
+                async checkHealth() {
+                    try {
+                        const h = await API.getHealth();
+                        this.dbConnected = h.mongodb === 'Connected';
+                    } catch (err) {
+                        this.dbConnected = false;
+                    }
+                },
+
+                async loadStats() {
+                    try {
+                        const resStats = await API.getDashboardAnalytics();
+                        if (resStats.status === 'success') {
+                            this.stats = resStats.dashboard;
+                        }
+
+                        const resUsage = await API.getApiUsage();
+                        if (resUsage.status === 'success') {
+                            this.apiUsage = resUsage.data;
+                        }
+
+                        const resGen = await API.getGenerationAnalytics();
+                        if (resGen.status === 'success') {
+                            this.generationData = resGen.data; // { generated, retrieved, failed }
+                        }
+
+                        const resQuery = await API.getRecentSearches();
+                        if (resQuery.status === 'success') {
+                            this.recentQueries = resQuery.data;
+                        }
+                    } catch (err) {
+                        showToast('Failed to load dashboard metrics: ' + err.message, 'error');
+                    }
+                },
+
+                formatTime(isoStr) {
+                    const d = new Date(isoStr);
+                    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                },
+
+                renderCharts() {
+                    // 1. API Usage Chart (Pie)
+                    const apiCtx = document.getElementById('apiUsageChart');
+                    if (apiCtx && this.apiUsage.length > 0) {
+                        const labels = this.apiUsage.map(x => x._id || 'root');
+                        const data = this.apiUsage.map(x => x.count);
+                        
+                        this.apiChart = new Chart(apiCtx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    data: data,
+                                    backgroundColor: [
+                                        'rgba(99, 102, 241, 0.45)', // Indigo
+                                        'rgba(139, 92, 246, 0.45)', // Violet
+                                        'rgba(16, 185, 129, 0.45)', // Emerald
+                                        'rgba(245, 158, 11, 0.45)', // Amber
+                                        'rgba(100, 116, 139, 0.45)' // Slate
+                                    ],
+                                    borderColor: '#0f172a',
+                                    borderWidth: 1.5
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'right',
+                                        labels: {
+                                            color: '#94a3b8',
+                                            font: { size: 10 }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    // 2. AI Gen analytics (Bar)
+                    const aiCtx = document.getElementById('aiGenerationChart');
+                    if (aiCtx && this.generationData) {
+                        const counts = [
+                            this.generationData.retrieved || 0,
+                            this.generationData.generated || 0,
+                            this.generationData.failed || 0
+                        ];
+
+                        this.aiChart = new Chart(aiCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: ['DB Hits (Cached)', 'AI Generated', 'Failed Generation'],
+                                datasets: [{
+                                    label: 'Volume',
+                                    data: counts,
+                                    backgroundColor: [
+                                        'rgba(16, 185, 129, 0.45)', // Emerald
+                                        'rgba(99, 102, 241, 0.45)', // Indigo
+                                        'rgba(244, 63, 94, 0.45)'   // Rose
+                                    ],
+                                    borderColor: [
+                                        '#10b981',
+                                        '#6366f1',
+                                        '#f43f5e'
+                                    ],
+                                    borderWidth: 1.5,
+                                    borderRadius: 6
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                        ticks: { color: '#64748b' }
+                                    },
+                                    x: {
+                                        grid: { display: false },
+                                        ticks: { color: '#64748b' }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            };
+        }
+    </script>
+</body>
+</html>
